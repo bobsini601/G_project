@@ -1,2 +1,2 @@
 # G_project
-Hongik university 2021 graduation project
+Hongik university 2022 graduation project
