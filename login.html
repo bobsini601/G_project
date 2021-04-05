@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="login.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Log in</title>
+    </head>
+    <body>
+        <div class="wrap">    
+            <div id="logo">
+                <img src="loginlogo.jpg" width="200px">
+            </div>
+        <div class="container">
+            <form action="/user/login" method="post">
+                <div class="log_left">
+                    <p class="input"><input id = "ID" type="text" name="" placeholder="ID"></p>
+                    <p class="input"><input id = "PW" type="password" name="" placeholder="PW"></p>
+                    <p class="findacnt">
+                        <a href="findid.html">아이디찾기</a>
+                        <a href="findpw.html">비밀번호찾기</a>
+                    </p>
+                </div>
+                <div class="log_right">
+                    <input type="submit" value="로그인">
+                    <a id="signup" href="../resources/signup.html">회원가입</a>
+                <div>
+            </form>
+        </div>
+    </body>
+</html>

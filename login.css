@@ -1,0 +1,59 @@
+a{
+    text-decoration: none;
+}
+.wrap{
+    display:flex;
+    flex-direction: column;
+    justify-content:center;
+    align-items: center;
+}
+.container{
+    display:flex;
+    float:left;
+    justify-content: center;
+    align-items:center;
+    margin-top:60px;
+    text-align:center;
+}
+form{
+    display:flex;
+}
+#logo{
+    padding-top:200px;
+}
+.log_left{
+    display:block;
+}
+.log_right{
+    display:block;
+    width:100px;
+}
+.log_btn{
+    width:100px;
+    height:100px;
+}
+.findacnt{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 200px;
+    box-sizing: border-box;
+}
+input{
+    width:250px;
+    height: 30px;
+    border:none;
+    border-bottom: 2px solid #adadad;
+    font-size:16px;
+}
+input[type=submit]{
+    width:90px;
+    height:90px;
+    margin:15px 10px;
+    background-color: rgb(181,214,146);
+    border:none;
+    border-radius: 0.2rem;
+}
+#signup{
+    margin-left:10px;
+}
