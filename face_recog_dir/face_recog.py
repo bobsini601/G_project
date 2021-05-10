@@ -17,6 +17,7 @@ class FaceRecog():
         self.known_face_names = [] # 사진 이름 리스트
 
         # Load sample pictures and learn how to recognize it.
+        # 'pictures' 디렉토리에는 사용자의 이미지가 있다.
         dirname = 'pictures' # 디렉토리 이름
         files = os.listdir(dirname) # listdir(): 디렉토리에 어떤 파일들이 있는지 리스트로 불러오기
         for filename in files:
@@ -103,13 +104,13 @@ if __name__ == '__main__':
     while True:
         frame = face_recog.get_frame()
 
-        # show the frame
+        # frame이 나타난다.
         cv2.imshow("Frame", frame)
         key = cv2.waitKey(1) & 0xFF # waitKey(): 키 입력을 기다리는 대기 함수. 괄호 안의 숫자는 키 입력 대기 시간으로 단위는 ms
                                     # 사실 영상을 보여주는 것이 아니라 웹캠으로 사진을 찍어서 사진을 연속으로 보여주는 것임.
                                     # 따라서 1ms마다 (키 입력을 기다리면서) 사진을 찍어서 보여주는 것. 만약 1000을 넣으면 1초마다 사진을 보여주게 되어 답답해짐
 
-        # if the `q` key was pressed, break from the loop
+        #'ESC' 키를 누르면, while문을 빠져나옴.
         if key == 27: # 27은 ESC키를 의미
             break
 
