@@ -41,7 +41,7 @@ def init_open_ear():
     th_message1.deamon = True
     th_message1.start()
     for i in range(7):
-        ear_list.append(both_ear)
+        ear_list.append(both_ear)   #both_ear: 양안의 평균 EAR값
         time.sleep(1)
     global OPEN_EAR  # OPEN_EAR: 측정한 EAR의 평균 값이 저장될 변수
     OPEN_EAR = sum(ear_list) / len(ear_list)
