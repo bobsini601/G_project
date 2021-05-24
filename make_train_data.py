@@ -23,14 +23,16 @@ def start(sample_size=25):
     labels = classify_label(train_data)
     # train_data와 labels를 보고 train data를 power, normal, short 이렇게 3가지로 분류한다.
     power, nomal, short = binding_label(train_data, labels)
+    #knn.train : knn알고리즘 학습 , 완료되면 true return
     print("Return true if training is successful :", knn.train(train_data, cv2.ml.ROW_SAMPLE, labels))
     return power, nomal, short
 
-
+''' knn 알고리즘을 통해 label 예측'''
 def run(new_data, power, nomal, short):
     a = np.array([new_data])
     b = a.astype(np.float32)
     # plot_data(power, nomal, short)
+    #  KNN 알고리즘으로 입력 데이터의 클래스 예측 - cv2.ml_KNearest.findNearest
     ret, results, neighbor, dist = knn.findNearest(b, 5)  # Second parameter means 'k'
     # print("Neighbor's label : ", neighbor)
     print("predicted label : ", results)
@@ -47,7 +49,7 @@ def generate_data(num_samples, num_features=2):
     data_size = (num_samples, num_features)
     # 0~40에서 data_size만큼 배열 생성해서 data
     data = np.random.randint(0, 40, size=data_size)
-    # int type -> float32 type 
+    # int type -> float32 type
     return data.astype(np.float32)
 
 
