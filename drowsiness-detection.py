@@ -64,12 +64,12 @@ def init_close_ear():
         time.sleep(1)
     CLOSE_EAR = sum(ear_list) / len(ear_list)  # CLOSE_EAR: 측정한 EAR의 평균 값이 저장될 변수
 
-    # EAR_THRESH: EAR의 50%.
-    # if (EAR < EAR_THRESH): 운전자가 졸린 상태인 것으로 판단 -> 운전자가 수면 상태가 아니라도 알람 울림
-    global EAR_THRESH
-    EAR_THRESH = (((OPEN_EAR - CLOSE_EAR) / 2) + CLOSE_EAR)  # EAR_THRESH means 50% of the being opened eyes state
+    # EAR_HALF: EAR의 50%.
+    # if (EAR < EAR_HALF): 운전자가 졸린 상태인 것으로 판단 -> 운전자가 수면 상태가 아니라도 알람 울림
+    global EAR_HALF
+    EAR_HALF = (((OPEN_EAR - CLOSE_EAR) / 2) + CLOSE_EAR)  # EAR_HALF means 50% of the being opened eyes state
     print("close list =", ear_list, "\nCLOSE_EAR =", CLOSE_EAR, "\n")
-    print("The last EAR_THRESH's value :", EAR_THRESH, "\n")
+    print("The last EAR_HALF's value :", EAR_HALF, "\n")
 
 
 # init_message: 알람 울리는 함수
@@ -87,13 +87,13 @@ def init_message():
 # 6. Variables for trained data generation and calculation fps.
 # 7. Detect face & eyes.
 # 8. Run the cam.
-# 9. Threads to run the functions in which determine the EAR_THRESH.
+# 9. Threads to run the functions in which determine the EAR_HALF.
 
 # 1.
 OPEN_EAR = 0  # For init_open_ear()
-EAR_THRESH = 0  # Threashold value
+EAR_HALF = 0  # Threashold value
 
-# 2. 약 20프레임 이상 동안 EAR < EAR_THRESH 이면 운전자가 졸고 있다고 판단
+# 2. 약 20프레임 이상 동안 EAR < EAR_HALF 이면 운전자가 졸고 있다고 판단
 # It doesn't matter what you use instead of a consecutive frame to check out drowsiness state. (ex. timer)
 EAR_CONSEC_FRAMES = 20
 COUNTER = 0  # Frames counter.
@@ -133,7 +133,7 @@ print("starting video stream thread...")
 vs = VideoStream(src=0).start()
 time.sleep(1.0)
 
-# 9. EAR_THRESH를 결정하기 위한 함수를 실행시키는 thread
+# 9. EAR_HALF를 결정하기 위한 함수를 실행시키는 thread
 th_open = Thread(target=init_open_ear)
 th_open.deamon = True
 th_open.start()
@@ -172,7 +172,7 @@ while True:
         cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1) # frame에 눈 위치 표시
         cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
 
-        if both_ear < EAR_THRESH: # 두눈의 평균 ear이 EAR_THRESH보다 작으면, 즉 눈을 감고있으면
+        if both_ear < EAR_HALF: # 두눈의 평균 ear이 EAR_HALF보다 작으면, 즉 눈을 감고있으면
             if not TIMER_FLAG: # 지금까지 한번도 졸지 않았다면
                 start_closing = timeit.default_timer() # 눈 감고 있는 시간 측정 시작
                 TIMER_FLAG = True
@@ -258,7 +258,7 @@ while True:
         cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
         cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
 
-        if both_ear < EAR_THRESH:
+        if both_ear < EAR_HALF:
             if not TIMER_FLAG:
                 start_closing = timeit.default_timer()
                 TIMER_FLAG = True
