@@ -24,7 +24,7 @@ import ringing_alarm as alarm
 # 눈의 종횡비(EAR)를 구하는 함수. eye[0] = P1. eye[5] = P6.
 # dist.euclidean: 두 점 사이의 유클리드 거리를 구해주는 함수
 
-def eye_fn(eye):
+def ear_fn(eye):
     A = dist.euclidean(eye[1], eye[5])
     B = dist.euclidean(eye[2], eye[4])
     C = dist.euclidean(eye[0], eye[3])
