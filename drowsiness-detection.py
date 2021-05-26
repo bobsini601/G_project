@@ -67,7 +67,7 @@ def init_close_ear():
     # EAR_HALF: EAR의 50%.
     # if (EAR < EAR_HALF): 운전자가 졸린 상태인 것으로 판단 -> 운전자가 수면 상태가 아니라도 알람 울림
     global EAR_HALF
-    EAR_HALF = (((OPEN_EAR - CLOSE_EAR) / 2) + CLOSE_EAR)  # EAR_HALF means 50% of the being opened eyes state
+    EAR_HALF = ((OPEN_EAR - CLOSE_EAR) / 2)  # EAR_HALF means 50% of the being opened eyes state
     print("close list =", ear_list, "\nCLOSE_EAR =", CLOSE_EAR, "\n")
     print("The last EAR_HALF's value :", EAR_HALF, "\n")
 
