@@ -1,3 +1,5 @@
+# picture 디렉토리에는 본인의 사진 1장만이 있다고 가정
+
 import os
 import numpy as np
 import time
@@ -20,40 +22,40 @@ class FaceRecog(): # 얼굴 인식을 위한 class
     def __init__(self):
         self.camera = camera.VideoCamera() # camera.py의 VideoCamera 클래스
 
-        self.known_face_encodings = [] # 사진의 얼굴 속성 값을 넣을 리스트
-        self.known_face_names = [] # 얼굴 이름을 넣을 리스트
-        self.is_recognized = 0 # 인식이 되었는지
+        self.image_face_encodings = [] # 사진의 얼굴 속성 값을 넣을 리스트
+        self.image_face_names = [] # 사진의 얼굴 이름을 넣을 리스트
+        self.is_recognized = 0 # 얼굴 인식이 완료되었는지 확인하는 변수(5 이상이 되면 얼굴 인식 완료)
 
-        dirname = 'pictures' # 디렉토리 이름
+        dirname = 'image' # 얼굴 사진이 들어있는 디렉토리 이름
         files = os.listdir(dirname) # listdir(): 디렉토리에 어떤 파일들이 있는지 리스트로 불러오기
         for filename in files:
             name, ext = os.path.splitext(filename) # 파일이름을 2개의 이름으로 분리(이름, 확장자명)
                                                    # 예를 들어, sein.jpg --> sein 과 .jpg
             if ext == '.jpg': # 확장자가 jpg 면
-                self.known_face_names.append(name) # 얼굴 이름 리스트에 이름 추가
+                self.image_face_names.append(name) # 얼굴 이름 리스트에 이름 추가
                 pathname = os.path.join(dirname, filename) # 파일이름을 경로에 합치기
                 img = face_recognition.load_image_file(pathname) # 위 경로를 통해 face_recognition에서 해당 이미지 불러오기
                 face_encoding = face_recognition.face_encodings(img)[0] # 불러온 이미지에서 68개 얼굴 위치(face landmarks)의 속성 값 알아내기
-                self.known_face_encodings.append(face_encoding) # 얼굴 속성 값을 리스트에 저장
+                self.image_face_encodings.append(face_encoding) # 얼굴 속성 값을 리스트에 저장
 
 
-        self.face_locations = []
-        self.face_encodings = []
-        self.face_names = []
+        self.face_locations = [] # 캠으로 인식한 얼굴 위치 값을 넣을 리스트
+        self.face_encodings = [] # 캠으로 인식한 얼굴 속성 값을 넣을 리스트
+        self.face_names = [] # 캠으로 인식한 얼굴 이름 값을 넣을 리스트
         self.process_this_frame = True
 
     def __del__(self):
         del self.camera
 
-    def get_frame(self): # 순수 frame 가져오기
+    def get_frame(self): # 순수 frame 가져오는 함수
         frame = self.camera.get_frame()
         return frame
 
-    def get_face_frame(self): # 얼굴 인식을 위한 frame
+    def get_face_frame(self): # 얼굴 인식을 한 frame을 가져오는 함수
 
-        frame = self.camera.get_frame() # 카메라로부터 frame 읽어서
+        frame = self.camera.get_frame() # 캠으로부터 frame 읽어서
         small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25) # frame의 크기를 1/4로 줄임(계산량을 줄이기 위해)
-        rgb_small_frame = small_frame[:, :, ::-1] # BGR(OpenCV가 쓰는거) -> RGB(face_recognition가 쓰는거)로 바꾸기
+        rgb_small_frame = small_frame[:, :, ::-1] # BGR(OpenCV가 쓰는거) -> RGB(dlib의 face_recognition가 쓰는거)로 바꾸기
 
 
         if self.process_this_frame: # 두 frame당 1번씩 계산(계산량을 줄이기 위해)
@@ -63,18 +65,18 @@ class FaceRecog(): # 얼굴 인식을 위한 class
 
             self.face_names = []
             for face_encoding in self.face_encodings:
-                distances = face_recognition.face_distance(self.known_face_encodings, face_encoding) # 사진의 face landmark와 frame의 face landmark를 거리로 비교
+                distances = face_recognition.face_distance(self.image_face_encodings, face_encoding) # 사진의 face landmark와 frame의 face landmark를 거리로 비교
 
                 name = "Unknown" # 거리가 0.6 이상이면 다른 사람으로 인식
                 if distances < 0.6: # 0.6 이하면
                     self.is_recognized += 1
                     index = np.argmin(distances)
-                    name = self.known_face_names[index] # 사진의 이름 불러오기
-                    self.face_names.append(name) # 그 사진 찾아서 이름 불러오기
+                    name = self.image_face_names[index] # 사진의 이름 불러오기
+                    self.face_names.append(name) # 이름 추가하기
 
         self.process_this_frame = not self.process_this_frame # True면 False로, False면 True로
 
-        # 결과 보여주는 네모 그리기
+        # 결과 보여주는 네모 그리기(openCV 사용)
         for (top, right, bottom, left), name in zip(self.face_locations, self.face_names):
             top *= 4
             right *= 4
@@ -192,8 +194,8 @@ predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
 
 #####################################################################################################################
 face_recog = FaceRecog()
-print(face_recog.known_face_names)
-is_first = True
+print(face_recog.image_face_names) # 사진의 이름 출력
+is_first = True # Thread는 한번만 실행되야 하기 때문에
 
 while True:
     # is_recognized 가 5이상이면 얼굴이 인식되었다고 판단
