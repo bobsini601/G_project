@@ -1,30 +1,22 @@
-
-# coding: utf-8
-
-# In[1]:
-
-import face_recognition # dlib에 있는 거 불러온것
-import camera # camera.py 불러온 것
 import os
 import numpy as np
-import imutils
 import time
 import timeit
 import dlib
 import cv2
-import matplotlib.pyplot as plt
 from scipy.spatial import distance as dist
-from imutils.video import VideoStream
 from imutils import face_utils
 from threading import Thread
 from threading import Timer
 from check_cam_fps import check_fps
+import face_recognition # dlib에 있는 거 불러온것
+import camera # camera.py 불러온 것
 import make_train_data as mtd
 import light_remover as lr
 import ringing_alarm as alarm
 
 
-class FaceRecog():
+class FaceRecog(): # 얼굴 인식을 위한 class
     def __init__(self):
         self.camera = camera.VideoCamera() # camera.py의 VideoCamera 클래스
 
@@ -45,7 +37,6 @@ class FaceRecog():
                 self.known_face_encodings.append(face_encoding) # 얼굴 속성 값을 리스트에 저장
 
 
-        # Initialize some variables
         self.face_locations = []
         self.face_encodings = []
         self.face_names = []
@@ -54,11 +45,11 @@ class FaceRecog():
     def __del__(self):
         del self.camera
 
-    def get_frame0(self):
+    def get_frame(self): # 순수 frame 가져오기
         frame = self.camera.get_frame()
         return frame
 
-    def get_frame(self):
+    def get_face_frame(self): # 얼굴 인식을 위한 frame
 
         frame = self.camera.get_frame() # 카메라로부터 frame 읽어서
         small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25) # frame의 크기를 1/4로 줄임(계산량을 줄이기 위해)
@@ -72,14 +63,11 @@ class FaceRecog():
 
             self.face_names = []
             for face_encoding in self.face_encodings:
-                # See if the face is a match for the known face(s)
                 distances = face_recognition.face_distance(self.known_face_encodings, face_encoding) # 사진의 face landmark와 frame의 face landmark를 거리로 비교
-                min_value = min(distances) # 이거 없애도 될듯
 
                 name = "Unknown" # 거리가 0.6 이상이면 다른 사람으로 인식
-                if min_value < 0.6: # 0.6 이하면
+                if distances < 0.6: # 0.6 이하면
                     self.is_recognized += 1
-                    #print("your face is recognized!")
                     index = np.argmin(distances)
                     name = self.known_face_names[index] # 사진의 이름 불러오기
                     self.face_names.append(name) # 그 사진 찾아서 이름 불러오기
@@ -88,17 +76,14 @@ class FaceRecog():
 
         # 결과 보여주는 네모 그리기
         for (top, right, bottom, left), name in zip(self.face_locations, self.face_names):
-            # Scale back up face locations since the frame we detected in was scaled to 1/4 size
             top *= 4
             right *= 4
             bottom *= 4
             left *= 4
 
-            # Draw a box around the face
-            cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
+            cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2) # 얼굴 주위로 네모 박스 그리고
 
-            # Draw a label with a name below the face
-            cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
+            cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED) # 이름 붙이기
             font = cv2.FONT_HERSHEY_DUPLEX
             cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
 
@@ -208,29 +193,28 @@ predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
 #####################################################################################################################
 face_recog = FaceRecog()
 print(face_recog.known_face_names)
-is_first = 0
+is_first = True
 
 while True:
-
+    # is_recognized 가 5이상이면 얼굴이 인식되었다고 판단
     if face_recog.is_recognized < 5:
-        frame = face_recog.get_frame()
+        frame = face_recog.get_face_frame()
         if face_recog.is_recognized == 5:
             print("your face is recognized!")
 
     else:
         # 9.
-        if is_first == 0:
+        if is_first == True:
             th_open = Thread(target=init_open_ear)
             th_open.deamon = True
             th_open.start()
             th_close = Thread(target=init_close_ear)
             th_close.deamon = True
             th_close.start()
-            is_first =1
+            is_first = False
 
-        #ret, frame = vs.read()
-        frame = face_recog.get_frame0()
-        #frame = cv2.resize(frame, dsize=(400, 640), interpolation=cv2.INTER_AREA) 없애도 될듯
+
+        frame = face_recog.get_frame()
 
         L, gray = lr.light_removing(frame)
 
