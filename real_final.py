@@ -15,6 +15,7 @@ import camera  # camera.py 불러온 것
 import make_train_data as mtd
 import pygame
 
+
 #############################  fuctions definition #######################################
 # 2. 빛을 지우고, face_landmark를 인식하기 쉽게 카메라 필터를 변환해줌.
 # 3. 강도에 따라 다른 알람 파일 재생
@@ -42,15 +43,15 @@ label에 따라 알람이 다름.
 
 def select_alarm(result):
     if result == 0:
-        sound_alarm("power_alarm.wav")
-    else:
         sound_alarm("nomal_alarm.wav")
+    elif result == 1:
+        sound_alarm("ppi.mp3")
 
 
 # 4.
-def sound_alarm():
+def sound_alarm(path):
     pygame.mixer.init()
-    pygame.mixer.music.load("ppi.mp3")
+    pygame.mixer.music.load(path)
     pygame.mixer.music.play()
 
 
@@ -141,9 +142,9 @@ def init_open_ear():
     time.sleep(5)
     print("눈을 떠주세요")
     ear_list = []
-    th_ring1 = Thread(target = sound_alarm)
+    th_ring1 = Thread(target=sound_alarm("open_your_eyes.mp3"))
     th_ring1.start()
-    for i in range(7) :
+    for i in range(7):
         ear_list.append(both_ear)
         time.sleep(1)
     global OPEN_EAR
@@ -157,27 +158,26 @@ def init_close_ear():
     time.sleep(5)
     print("눈을 감아주세요")
     ear_list = []
-    th_ring2 = Thread(target = sound_alarm)
+    th_ring2 = Thread(target=sound_alarm("close_your_eyes.mp3"))
     th_ring2.start()
     time.sleep(1)
-    for i in range(7) :
+    for i in range(7):
         ear_list.append(both_ear)
         time.sleep(1)
     CLOSE_EAR = sum(ear_list) / len(ear_list)
     global EAR_THRESH
-    EAR_THRESH = (((OPEN_EAR - CLOSE_EAR) / 2) + CLOSE_EAR) #EAR_THRESH means 50% of the being opened eyes state
+    EAR_THRESH = (((OPEN_EAR - CLOSE_EAR) / 2) + CLOSE_EAR)  # EAR_THRESH means 50% of the being opened eyes state
     print("close list =", ear_list, "\nCLOSE_EAR =", CLOSE_EAR, "\n")
-    print("The last EAR_THRESH's value :",EAR_THRESH, "\n")
+    print("The last EAR_THRESH's value :", EAR_THRESH, "\n")
 
 
-
-def def_level(o_time, c_time):
-    result=-1
+def def_level(c_time):
+    result = -1
     if c_time >= 2:
-            result=0
-            if c_time>=4:
-                result=1
-    print("drowsiness level :",result)
+        result = 0
+        if c_time >= 4:
+            result = 1
+    print("drowsiness level :", result)
     return result
 
 
@@ -207,22 +207,20 @@ TIMER_FLAG = False  # Flag to activate 'start_closing' variable, which measures 
 ALARM_FLAG = False  # Flag to check if alarm has ever been triggered.
 
 # 4.
-#ALARM_COUNT = 0  # Number of times the total alarm rang.
-#RUNNING_TIME = 0  # Variable to prevent alarm going off continuously.
+ALARM_COUNT = 0  # Number of times the total alarm rang.
+# RUNNING_TIME = 0  # Variable to prevent alarm going off continuously.
 
 # 5.
-#PREV_TERM = 0  # Variable to measure the time eyes were being opened until the alarm rang.
+# PREV_TERM = 0  # Variable to measure the time eyes were being opened until the alarm rang.
 
 # 6. make trained data
 np.random.seed(9)
-power, nomal, short = mtd.start(
-    25)  # actually this three values aren't used now. (if you use this, you can do the plotting)
 # The array the actual test data is placed.
 test_data = []
 # The array the actual labeld data of test data is placed.
 result_data = []
 # For calculate fps
-#prev_time = 0
+# prev_time = 0
 
 # 7. 랜드마크 추출
 print("loading facial landmark predictor...")
@@ -252,7 +250,7 @@ while True:
 
     else:
         # 9.
-        if is_first == 0: #처음 실행되는 경우, EAR 값 초기화
+        if is_first == 0:  # 처음 실행되는 경우, EAR 값 초기화
             th_open = Thread(target=init_open_ear)
             th_open.start()
             th_close = Thread(target=init_close_ear)
@@ -262,7 +260,7 @@ while True:
 
         frame = face_recog.get_frame()
 
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) #영상 회색조 처리
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # 영상 회색조 처리
 
         rects = detector(gray, 0)
 
@@ -270,7 +268,7 @@ while True:
         # prev_time, fps = check_fps(prev_time)
         # cv2.putText(frame, "fps : {:.2f}".format(fps), (10,130), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (200,30,20), 2)
 
-        #영상에서 랜드마크를 추출하여 눈의 위치 파악
+        # 영상에서 랜드마크를 추출하여 눈의 위치 파악
         for rect in rects:
             shape = predictor(gray, rect)
             shape = face_utils.shape_to_np(shape)
@@ -288,56 +286,53 @@ while True:
             cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
             cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
 
-
-            #EAR이 역치보다 작으면
+            # EAR이 역치보다 작으면
             if both_ear < EAR_THRESH:
-                if not TIMER_FLAG:  #만약 타이머가 작동되지 않는 상태면 졸음시간 측정 시작
+                if not TIMER_FLAG:  # 만약 타이머가 작동되지 않는 상태면 졸음시간 측정 시작
                     start_closing = timeit.default_timer()
                     TIMER_FLAG = True
-                COUNTER += 1    #프레임 카운트 시작
+                COUNTER += 1  # 프레임 카운트 시작
 
-                
-                #일정 시간 이상 눈을 감고 있으면
+                # 일정 시간 이상 눈을 감고 있으면
                 if COUNTER >= EAR_CONSEC_FRAMES:
-
                     mid_closing = timeit.default_timer()
                     closing_time = round((mid_closing - start_closing), 3)
-                    select_alarm(result)    #알람 울림
-                    time.sleep(5)   #알람이 울릴동안 일시정지
-                    #if (result==0) result += 1
-                    
+                    level = def_level(closing_time)
+                    select_alarm(level)  # 알람 울림
+                    time.sleep(5)  # 알람이 울릴동안 일시정지
+                    # if (result==0) result += 1
 
-                    #if closing_time >= RUNNING_TIME:
-                        #if RUNNING_TIME == 0:
-                            #CUR_TERM = timeit.default_timer()
-                            #OPENED_EYES_TIME = round((CUR_TERM - PREV_TERM), 3)
-                           # PREV_TERM = CUR_TERM
-                           # RUNNING_TIME = 1.75
+                    # if closing_time >= RUNNING_TIME:
+                    # if RUNNING_TIME == 0:
+                    # CUR_TERM = timeit.default_timer()
+                    # OPENED_EYES_TIME = round((CUR_TERM - PREV_TERM), 3)
+                    # PREV_TERM = CUR_TERM
+                    # RUNNING_TIME = 1.75
 
-                    #RUNNING_TIME += 2
+                    # RUNNING_TIME += 2
                     ALARM_FLAG = True
                     ALARM_COUNT += 1
 
-                    result = def_level(OPENED_EYES_TIME, closing_time)  #알람 레벨값 저장
-                    result_data.append(result)
-                    select_alarm(result)
+#                    result = def_level(closing_time)  # 알람 레벨값 저장
+#                    result_data.append(result)
+#                    select_alarm(result)
 
-                        #print("{0}st ALARM".format(ALARM_COUNT))
-                        #print("The time eyes is being opened before the alarm went off :", OPENED_EYES_TIME)
-                        #print("closing time :", closing_time)
-                        #test_data.append([OPENED_EYES_TIME, round(closing_time * 10, 3)])
-                        #result = mtd.run([OPENED_EYES_TIME, closing_time * 10], power, nomal, short)
-                        #result_data.append(result)
-                        
+                    # print("{0}st ALARM".format(ALARM_COUNT))
+                    # print("The time eyes is being opened before the alarm went off :", OPENED_EYES_TIME)
+                    # print("closing time :", closing_time)
+                    # test_data.append([OPENED_EYES_TIME, round(closing_time * 10, 3)])
+                    # result = mtd.run([OPENED_EYES_TIME, closing_time * 10], power, nomal, short)
+                    # result_data.append(result)
+
 
             else:
                 COUNTER = 0
                 TIMER_FLAG = False
-                #RUNNING_TIME = 0
+                # RUNNING_TIME = 0
 
                 if ALARM_FLAG:
-                    end_closing = timeit.default_timer()    #졸음이 끝난 시간 측정
-                    closed_eyes_time.append(round((end_closing - start_closing), 3))    #졸음 시간 계산
+                    end_closing = timeit.default_timer()  # 졸음이 끝난 시간 측정
+                    closed_eyes_time.append(round((end_closing - start_closing), 3))  # 졸음 시간 계산
                     print("The time eyes were being offed :", closed_eyes_time)
 
                 ALARM_FLAG = False
