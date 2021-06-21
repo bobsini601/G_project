@@ -17,11 +17,11 @@ import pygame
 
 
 #############################  fuctions definition #######################################
-# 2. 빛을 지우고, face_landmark를 인식하기 쉽게 카메라 필터를 변환해줌.
-# 3. 강도에 따라 다른 알람 파일 재생
-# 4. 경로에서 alarm을 load 한 다음 재생.
+# 1. 빛을 지우고, face_landmark를 인식하기 쉽게 카메라 필터를 변환해줌.
+# 2. 강도에 따라 다른 알람 파일 재생
+# 3. 경로에서 alarm을 load 한 다음 재생.
 
-# 2.
+# 1.
 def light_removing(frame):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # frame을 gray로
     lab = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)  # 색반전
@@ -32,14 +32,12 @@ def light_removing(frame):
     return L, composed
 
 
-# 3.
+# 2.
 '''
 label에 따라 알람이 다름.
 0 power : 졸음 강도 강함 
 1 normal : 졸음 강도 중간 
-2 short : 졸음 강도 약함
 '''
-
 
 def select_alarm(result):
     if result == 0:
@@ -48,7 +46,7 @@ def select_alarm(result):
         sound_alarm("ppi.mp3")
 
 
-# 4.
+# 3.
 def sound_alarm(path):
     pygame.mixer.init()
     pygame.mixer.music.load(path)
