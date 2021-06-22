@@ -138,7 +138,9 @@ def init_open_ear():
     time.sleep(5)
     print("눈을 떠주세요")
     ear_list = []
-    play_sound("open_your_eyes.mp3")
+    th1 = Thread(target=play_sound("open_your_eyes.mp3"))
+    th1.start()
+    time.sleep(5)
     th_ring1 = Thread(target=play_sound("ppi.mp3"))
     th_ring1.start()
     for i in range(7):
@@ -155,7 +157,9 @@ def init_close_ear():
     time.sleep(5)
     print("눈을 감아주세요")
     ear_list = []
-    play_sound("close_your_eyes.mp3")
+    th2 = Thread(target=play_sound("close_your_eyes.mp3"))
+    th2.start()
+    time.sleep(6)
     th_ring2 = Thread(target=play_sound("ppi.mp3"))
     th_ring2.start()
     time.sleep(1)
@@ -175,7 +179,9 @@ def init_open_mouth():
     time.sleep(5)
     print("입을 벌려주세요")
     mar_list = []
-    play_sound("open_your_mouth.mp3")
+    th3 = Thread(target=play_sound("open_your_mouth.mp3"))
+    th3.start()
+    time.sleep(5)
     th_ring3 = Thread(target=play_sound("ppi.mp3"))
     th_ring3.start()
     for i in range(7):
@@ -192,7 +198,9 @@ def init_close_mouth():
     time.sleep(5)
     print("입을 다물어주세요")
     mar_list = []
-    play_sound("close_your_mouth.mp3")
+    th4 = Thread(target=play_sound("close_your_mouth.mp3"))
+    th4.start()
+    time.sleep(5)
     th_ring4 = Thread(target=play_sound("ppi.mp3"))
     th_ring4.start()
     time.sleep(1)
@@ -349,8 +357,9 @@ while True:
                     mid_closing = timeit.default_timer()
                     closing_time = round((mid_closing - start_closing), 3)
                     level = def_level(closing_time)
-                    def_alarm(level)  # 알람 울림
-                    time.sleep(5)  # 알람이 울릴동안 일시정지
+                    alarm_thread = Thread(target=def_alarm(level))
+                    alarm_thread.start()  # 알람 울림
+                    #time.sleep(5)  # 알람이 울릴동안 일시정지
                     # if (result==0) result += 1
 
                     # if closing_time >= RUNNING_TIME:
