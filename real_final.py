@@ -17,37 +17,25 @@ import pygame
 
 
 #############################  fuctions definition #######################################
-# 1. 빛을 지우고, face_landmark를 인식하기 쉽게 카메라 필터를 변환해줌.
-# 2. 강도에 따라 다른 알람 파일 재생
-# 3. 경로에서 alarm을 load 한 다음 재생.
+# 1. 강도에 따라 다른 알람 파일 재생
+# 2. 경로에서 alarm을 load 한 다음 재생.
+
 
 # 1.
-def light_removing(frame):
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # frame을 gray로
-    lab = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)  # 색반전
-    L = lab[:, :, 0]  # frame 값을 리스트로 나열
-    med_L = cv2.medianBlur(L, 99)  # frame의 노이즈 제거
-    invert_L = cv2.bitwise_not(med_L)  # frame 빛반전
-    composed = cv2.addWeighted(gray, 0.75, invert_L, 0.25, 0)  # gray 75%, invert 25%로 new frame 생성
-    return L, composed
+'''
+label에 따라 알람이 다름.
+0 weak : 졸음 강도 약함 
+1 strong : 졸음 강도 강함 
+'''
+def def_alarm(result):
+    if result == 0:
+        play_sound("nomal_alarm.wav")
+    elif result == 1:
+        play_sound("ppi.mp3")
 
 
 # 2.
-'''
-label에 따라 알람이 다름.
-0 power : 졸음 강도 강함 
-1 normal : 졸음 강도 중간 
-'''
-
-def select_alarm(result):
-    if result == 0:
-        sound_alarm("nomal_alarm.wav")
-    elif result == 1:
-        sound_alarm("ppi.mp3")
-
-
-# 3.
-def sound_alarm(path):
+def play_sound(path):
     pygame.mixer.init()
     pygame.mixer.music.load(path)
     pygame.mixer.music.play()
@@ -135,21 +123,23 @@ def eye_aspect_ratio(eye):
     ear = (A + B) / (2.0 * C)
     return ear
 
+
 def mouth_aspect_ratio(mouth):
     A = dist.euclidean(mouth[3], mouth[9])
     B = dist.euclidean(mouth[2], mouth[10])
     C = dist.euclidean(mouth[4], mouth[8])
-    L = (A+B+C)/3
+    L = (A + B + C) / 3
     D = dist.euclidean(mouth[0], mouth[6])
-    mar = L/D
+    mar = L / D
     return mar
+
 
 def init_open_ear():
     time.sleep(5)
     print("눈을 떠주세요")
     ear_list = []
-    sound_alarm("open_your_eyes.mp3")
-    th_ring1 = Thread(target=sound_alarm("ppi.mp3"))
+    play_sound("open_your_eyes.mp3")
+    th_ring1 = Thread(target=play_sound("ppi.mp3"))
     th_ring1.start()
     for i in range(7):
         ear_list.append(both_ear)
@@ -165,8 +155,8 @@ def init_close_ear():
     time.sleep(5)
     print("눈을 감아주세요")
     ear_list = []
-    sound_alarm("close_your_eyes.mp3")
-    th_ring2 = Thread(target=sound_alarm("ppi.mp3"))
+    play_sound("close_your_eyes.mp3")
+    th_ring2 = Thread(target=play_sound("ppi.mp3"))
     th_ring2.start()
     time.sleep(1)
     for i in range(7):
@@ -178,14 +168,15 @@ def init_close_ear():
     print("close list =", ear_list, "\nCLOSE_EAR =", CLOSE_EAR, "\n")
     print("The last EAR_THRESH's value :", EAR_THRESH, "\n")
 
+
 def init_open_mouth():
     time.sleep(2)
     th_close.join()
     time.sleep(5)
     print("입을 벌려주세요")
     mar_list = []
-    sound_alarm("open_your_mouth.mp3")
-    th_ring3 = Thread(target=sound_alarm("ppi.mp3"))
+    play_sound("open_your_mouth.mp3")
+    th_ring3 = Thread(target=play_sound("ppi.mp3"))
     th_ring3.start()
     for i in range(7):
         mar_list.append(mouth_mar)
@@ -194,14 +185,15 @@ def init_open_mouth():
     OPEN_MAR = sum(mar_list) / len(mar_list)
     print("open mouth =", mar_list, "\nOPEN_MAR =", OPEN_MAR, "\n")
 
+
 def init_close_mouth():
     time.sleep(2)
     mouth_open.join()
     time.sleep(5)
     print("입을 다물어주세요")
     mar_list = []
-    sound_alarm("close_your_mouth.mp3")
-    th_ring4 = Thread(target=sound_alarm("ppi.mp3"))
+    play_sound("close_your_mouth.mp3")
+    th_ring4 = Thread(target=play_sound("ppi.mp3"))
     th_ring4.start()
     time.sleep(1)
     for i in range(7):
@@ -212,9 +204,14 @@ def init_close_mouth():
     MAR_THRESH = ((OPEN_MAR - CLOSE_MAR) * 0.7) + CLOSE_MAR
     print("close mouth =", mar_list, "\nCLOSE_MAR =", CLOSE_MAR, "\n")
     print("The last MAR_THRESH's value : ", MAR_THRESH, "\n")
-    
 
-
+''' 
+졸음 강도를 결정하는 함수
+c_time: 눈 감은 시간
+result: 졸음 강도 (0,1)
+눈 감은 시간이 2초 이상일 경우, lv0 (weak alarm)
+눈 감은 시간이 4초 이상일 경우, lv1 (strong alarm)
+'''
 def def_level(c_time):
     result = -1
     if c_time >= 2:
@@ -246,8 +243,7 @@ OPEN_MAR = 0
 # It doesn't matter what you use instead of a consecutive frame to check out drowsiness state. (ex. timer)
 EAR_CONSEC_FRAMES = 20
 COUNTER = 0  # 졸음 프레임 카운터
-YAWN_COUNT = -1 #하품 횟수 카운트
-
+YAWN_COUNT = -1  # 하품 횟수 카운트
 
 # 3.
 closed_eyes_time = []  # 눈을 감은 시간
@@ -336,7 +332,7 @@ while True:
             # (leftEAR + rightEAR) / 2 => both_ear.
             both_ear = (leftEAR + rightEAR) / 2.0  # I multiplied by 1000 to enlarge the scope.
             mouth_mar = mar
-            
+
             leftEyeHull = cv2.convexHull(leftEye)
             rightEyeHull = cv2.convexHull(rightEye)
             mouthHull = cv2.convexHull(mouth)
@@ -356,7 +352,7 @@ while True:
                     mid_closing = timeit.default_timer()
                     closing_time = round((mid_closing - start_closing), 3)
                     level = def_level(closing_time)
-                    select_alarm(level)  # 알람 울림
+                    def_alarm(level)  # 알람 울림
                     time.sleep(5)  # 알람이 울릴동안 일시정지
                     # if (result==0) result += 1
 
@@ -371,17 +367,16 @@ while True:
                     ALARM_FLAG = True
                     ALARM_COUNT += 1
 
-#                    result = def_level(closing_time)  # 알람 레벨값 저장
-#                    result_data.append(result)
-#                    select_alarm(result)
+            #                    result = def_level(closing_time)  # 알람 레벨값 저장
+            #                    result_data.append(result)
+            #                    def_alarm(result)
 
-                    # print("{0}st ALARM".format(ALARM_COUNT))
-                    # print("The time eyes is being opened before the alarm went off :", OPENED_EYES_TIME)
-                    # print("closing time :", closing_time)
-                    # test_data.append([OPENED_EYES_TIME, round(closing_time * 10, 3)])
-                    # result = mtd.run([OPENED_EYES_TIME, closing_time * 10], power, nomal, short)
-                    # result_data.append(result)
-
+            # print("{0}st ALARM".format(ALARM_COUNT))
+            # print("The time eyes is being opened before the alarm went off :", OPENED_EYES_TIME)
+            # print("closing time :", closing_time)
+            # test_data.append([OPENED_EYES_TIME, round(closing_time * 10, 3)])
+            # result = mtd.run([OPENED_EYES_TIME, closing_time * 10], power, nomal, short)
+            # result_data.append(result)
 
             else:
                 COUNTER = 0
@@ -407,9 +402,9 @@ while True:
                     if not YAWN_FLAG:
                         YAWN_COUNT += 1
                         YAWN_FLAG = True
-                    
 
-            
+
+
             else:
                 YAWN_TIMER = False
                 YAWN_FLAG = False
