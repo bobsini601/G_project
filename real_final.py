@@ -313,9 +313,6 @@ while True:
 
         rects = detector(gray, 0)
 
-        # checking fps. If you want to check fps, just uncomment below two lines.
-        # prev_time, fps = check_fps(prev_time)
-        # cv2.putText(frame, "fps : {:.2f}".format(fps), (10,130), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (200,30,20), 2)
 
         # 영상에서 랜드마크를 추출하여 눈의 위치 파악
         for rect in rects:
