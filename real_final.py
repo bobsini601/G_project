@@ -135,12 +135,21 @@ def eye_aspect_ratio(eye):
     ear = (A + B) / (2.0 * C)
     return ear
 
+def mouth_aspect_ratio(mouth):
+    A = dist.euclidean(mouth[3], mouth[9])
+    B = dist.euclidean(mouth[2], mouth[10])
+    C = dist.euclidean(mouth[4], mouth[8])
+    L = (A+B+C)/3
+    D = dist.euclidean(mouth[0], mouth[6])
+    mar = L/D
+    return mar
 
 def init_open_ear():
     time.sleep(5)
     print("눈을 떠주세요")
     ear_list = []
-    th_ring1 = Thread(target=sound_alarm("open_your_eyes.mp3"))
+    sound_alarm("open_your_eyes.mp3")
+    th_ring1 = Thread(target=sound_alarm("ppi.mp3"))
     th_ring1.start()
     for i in range(7):
         ear_list.append(both_ear)
@@ -156,7 +165,8 @@ def init_close_ear():
     time.sleep(5)
     print("눈을 감아주세요")
     ear_list = []
-    th_ring2 = Thread(target=sound_alarm("close_your_eyes.mp3"))
+    sound_alarm("close_your_eyes.mp3")
+    th_ring2 = Thread(target=sound_alarm("ppi.mp3"))
     th_ring2.start()
     time.sleep(1)
     for i in range(7):
@@ -167,6 +177,42 @@ def init_close_ear():
     EAR_THRESH = (((OPEN_EAR - CLOSE_EAR) / 2) + CLOSE_EAR)  # EAR_THRESH means 50% of the being opened eyes state
     print("close list =", ear_list, "\nCLOSE_EAR =", CLOSE_EAR, "\n")
     print("The last EAR_THRESH's value :", EAR_THRESH, "\n")
+
+def init_open_mouth():
+    time.sleep(2)
+    th_close.join()
+    time.sleep(5)
+    print("입을 벌려주세요")
+    mar_list = []
+    sound_alarm("open_your_mouth.mp3")
+    th_ring3 = Thread(target=sound_alarm("ppi.mp3"))
+    th_ring3.start()
+    for i in range(7):
+        mar_list.append(mouth_mar)
+        time.sleep(1)
+    global OPEN_MAR
+    OPEN_MAR = sum(mar_list) / len(mar_list)
+    print("open mouth =", mar_list, "\nOPEN_MAR =", OPEN_MAR, "\n")
+
+def init_close_mouth():
+    time.sleep(2)
+    mouth_open.join()
+    time.sleep(5)
+    print("입을 다물어주세요")
+    mar_list = []
+    sound_alarm("close_your_mouth.mp3")
+    th_ring4 = Thread(target=sound_alarm("ppi.mp3"))
+    th_ring4.start()
+    time.sleep(1)
+    for i in range(7):
+        mar_list.append(mouth_mar)
+        time.sleep(1)
+    CLOSE_MAR = sum(mar_list) / len(mar_list)
+    global MAR_THRESH
+    MAR_THRESH = ((OPEN_MAR - CLOSE_MAR) * 0.7) + CLOSE_MAR
+    print("close mouth =", mar_list, "\nCLOSE_MAR =", CLOSE_MAR, "\n")
+    print("The last MAR_THRESH's value : ", MAR_THRESH, "\n")
+    
 
 
 def def_level(c_time):
@@ -193,17 +239,22 @@ def def_level(c_time):
 # 1.
 OPEN_EAR = 0  # For init_open_ear()
 EAR_THRESH = 0  # EAR 기준값
+MAR_THRESH = 0
+OPEN_MAR = 0
 
 # 2.
 # It doesn't matter what you use instead of a consecutive frame to check out drowsiness state. (ex. timer)
 EAR_CONSEC_FRAMES = 20
 COUNTER = 0  # 졸음 프레임 카운터
+YAWN_COUNT = -1 #하품 횟수 카운트
+
 
 # 3.
 closed_eyes_time = []  # 눈을 감은 시간
 TIMER_FLAG = False  # Flag to activate 'start_closing' variable, which measures the eyes closing time.
 ALARM_FLAG = False  # Flag to check if alarm has ever been triggered.
-
+YAWN_FLAG = False
+YAWN_TIMER = False
 # 4.
 ALARM_COUNT = 0  # Number of times the total alarm rang.
 # RUNNING_TIME = 0  # Variable to prevent alarm going off continuously.
@@ -227,7 +278,7 @@ predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
 
 (lStart, lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
 (rStart, rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
-
+(mStart, mEnd) = face_utils.FACIAL_LANDMARKS_IDXS["mouth"]
 # 8.
 # print("starting video stream thread...")
 # vs = cv2.VideoCapture(0)
@@ -253,6 +304,10 @@ while True:
             th_open.start()
             th_close = Thread(target=init_close_ear)
             th_close.start()
+            mouth_open = Thread(target=init_open_mouth)
+            mouth_open.start()
+            mouth_close = Thread(target=init_close_mouth)
+            mouth_close.start()
 
             is_first = 1
 
@@ -273,16 +328,21 @@ while True:
 
             leftEye = shape[lStart:lEnd]
             rightEye = shape[rStart:rEnd]
+            mouth = shape[mStart:mEnd]
             leftEAR = eye_aspect_ratio(leftEye)
             rightEAR = eye_aspect_ratio(rightEye)
+            mar = mouth_aspect_ratio(mouth)
 
             # (leftEAR + rightEAR) / 2 => both_ear.
             both_ear = (leftEAR + rightEAR) / 2.0  # I multiplied by 1000 to enlarge the scope.
-
+            mouth_mar = mar
+            
             leftEyeHull = cv2.convexHull(leftEye)
             rightEyeHull = cv2.convexHull(rightEye)
+            mouthHull = cv2.convexHull(mouth)
             cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
             cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
+            cv2.drawContours(frame, [mouthHull], -1, (0, 255, 0), 1)
 
             # EAR이 역치보다 작으면
             if both_ear < EAR_THRESH:
@@ -336,6 +396,28 @@ while True:
                 ALARM_FLAG = False
 
             cv2.putText(frame, "EAR : {:.2f}".format(both_ear), (300, 130), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+                        (200, 30, 20), 2)
+
+            if mar > MAR_THRESH:
+                if not YAWN_TIMER:
+                    start_yawn = timeit.default_timer()
+                    YAWN_TIMER = True
+
+                if (timeit.default_timer() - start_yawn > 2.0):
+                    if not YAWN_FLAG:
+                        YAWN_COUNT += 1
+                        YAWN_FLAG = True
+                    
+
+            
+            else:
+                YAWN_TIMER = False
+                YAWN_FLAG = False
+
+            cv2.putText(frame, "MAR : {:.2f}".format(mar), (300, 430), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+                        (200, 30, 20), 2)
+            text = "YAWN COUNT : " + str(YAWN_COUNT)
+            cv2.putText(frame, text, (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
                         (200, 30, 20), 2)
 
     cv2.imshow("Frame", frame)
