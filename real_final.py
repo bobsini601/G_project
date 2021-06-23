@@ -226,7 +226,8 @@ def def_level(c_time):
         result = 0
         if c_time >= 4:
             result = 1
-    print("drowsiness level :", result)
+    if result>=0:
+        print("drowsiness level :", result)
     return result
 
 
