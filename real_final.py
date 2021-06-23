@@ -27,7 +27,7 @@ label에 따라 알람이 다름.
 0 weak : 졸음 강도 약함 
 1 strong : 졸음 강도 강함 
 '''
-def def_alarm(result):
+def def_alarm(result): 
     if result == 0:
         play_sound("nomal_alarm.wav")
     elif result == 1:
@@ -35,7 +35,7 @@ def def_alarm(result):
 
 
 # 2.
-def play_sound(path):
+def play_sound(path):   # 지정 경로(path)의 파일을 불러와 재생
     pygame.mixer.init()
     pygame.mixer.music.load(path)
     pygame.mixer.music.play()
@@ -116,7 +116,7 @@ class FaceRecog():  # 얼굴 인식을 위한 class
         return frame
 
 
-def eye_aspect_ratio(eye):
+def eye_aspect_ratio(eye):  #EAR 계산
     A = dist.euclidean(eye[1], eye[5])
     B = dist.euclidean(eye[2], eye[4])
     C = dist.euclidean(eye[0], eye[3])
@@ -124,7 +124,7 @@ def eye_aspect_ratio(eye):
     return ear
 
 
-def mouth_aspect_ratio(mouth):
+def mouth_aspect_ratio(mouth):  #MAR 계산
     A = dist.euclidean(mouth[3], mouth[9])
     B = dist.euclidean(mouth[2], mouth[10])
     C = dist.euclidean(mouth[4], mouth[8])
@@ -134,82 +134,82 @@ def mouth_aspect_ratio(mouth):
     return mar
 
 
-def init_open_ear():
+def init_open_ear():    # 눈을 뜬 상태의 평균 EAR 측정
     time.sleep(5)
     print("눈을 떠주세요")
-    ear_list = []
-    th1 = Thread(target=play_sound("open_your_eyes.mp3"))
+    ear_list = []   # ear_list : 측정한 EAR값들을 저장하는 리스트
+    th1 = Thread(target=play_sound("open_your_eyes.mp3"))   # 동시 실행을 위해 스레드 사용
     th1.start()
-    time.sleep(5)
+    time.sleep(5)   # 안내문구가 재생될 동안 일시정지
     th_ring1 = Thread(target=play_sound("ppi.mp3"))
-    th_ring1.start()
+    th_ring1.start()    # 삐 소리가 울리면서 EAR 측정 시작
     for i in range(7):
-        ear_list.append(both_ear)
+        ear_list.append(both_ear)   # 양안의 평균 EAR을 ear_list에 append
         time.sleep(1)
     global OPEN_EAR
-    OPEN_EAR = sum(ear_list) / len(ear_list)
+    OPEN_EAR = sum(ear_list) / len(ear_list)    # OPEN_EAR : 눈을 뜬 상태의 평균 EAR
     print("open list =", ear_list, "\nOPEN_EAR =", OPEN_EAR, "\n")
 
 
-def init_close_ear():
+def init_close_ear():   # 눈을 감은 상태의 평균 EAR 측정
     time.sleep(2)
-    th_open.join()
+    th_open.join()  # 이전에 실행한 스레드가 종료될때까지 기다림
     time.sleep(5)
-    print("눈을 감아주세요")
-    ear_list = []
-    th2 = Thread(target=play_sound("close_your_eyes.mp3"))
+    print("눈을 감아주세요")  
+    ear_list = []   # ear_list: 측정한 EAR값들을 저장하는 리스트
+    th2 = Thread(target=play_sound("close_your_eyes.mp3"))   # 동시 실행을 위해 스레드 사용
     th2.start()
-    time.sleep(6)
+    time.sleep(6)   # 안내문구가 재생될 동안 일시정지
     th_ring2 = Thread(target=play_sound("ppi.mp3"))
     th_ring2.start()
     time.sleep(1)
     for i in range(7):
-        ear_list.append(both_ear)
+        ear_list.append(both_ear)   # 양안의 평균 EAR을 ear_list에 append
         time.sleep(1)
-    CLOSE_EAR = sum(ear_list) / len(ear_list)
+    CLOSE_EAR = sum(ear_list) / len(ear_list)   # CLOSE_EAR : 눈을 감은 상태의 평균 EAR
     global EAR_THRESH
-    EAR_THRESH = (((OPEN_EAR - CLOSE_EAR) / 2) + CLOSE_EAR)  # EAR_THRESH means 50% of the being opened eyes state
-    print("close list =", ear_list, "\nCLOSE_EAR =", CLOSE_EAR, "\n")
+    EAR_THRESH = (((OPEN_EAR - CLOSE_EAR) / 2) + CLOSE_EAR)  # EAR_THRESH : 졸음 여부를 판단할 EAR의 역치값. OPEN_EAR과 CLOSE_EAR의 중간값
+    print("close list =", ear_list, "\nCLOSE_EAR =", CLOSE_EAR, "\n")  
     print("The last EAR_THRESH's value :", EAR_THRESH, "\n")
 
 
-def init_open_mouth():
+def init_open_mouth():  # 입을 벌린 상태의 평균 MAR 측정
     time.sleep(2)
-    th_close.join()
+    th_close.join()     # 이전에 실행한 스레드가 종료될때까지 기다림
     time.sleep(5)
     print("입을 벌려주세요")
-    mar_list = []
-    th3 = Thread(target=play_sound("open_your_mouth.mp3"))
+    mar_list = []   # mar_list: 측정한 MAR값들을 저장하는 리스트
+    th3 = Thread(target=play_sound("open_your_mouth.mp3"))   # 동시 실행을 위해 스레드 사용
     th3.start()
-    time.sleep(5)
+    time.sleep(5)   # 안내문구가 재생될 동안 일시정지
     th_ring3 = Thread(target=play_sound("ppi.mp3"))
     th_ring3.start()
     for i in range(7):
-        mar_list.append(mouth_mar)
+        mar_list.append(mouth_mar)  # MAR을 mar_list에 append
         time.sleep(1)
     global OPEN_MAR
-    OPEN_MAR = sum(mar_list) / len(mar_list)
+    OPEN_MAR = sum(mar_list) / len(mar_list)    # OPEN_MAR : 입을 벌린 상태의 평균 MAR
     print("open mouth =", mar_list, "\nOPEN_MAR =", OPEN_MAR, "\n")
 
 
-def init_close_mouth():
+def init_close_mouth(): # 입을 다문 상태의 평균 MAR 측정
     time.sleep(2)
-    mouth_open.join()
+    mouth_open.join()   # 이전에 실행한 스레드가 종료될때까지 기다림
     time.sleep(5)
     print("입을 다물어주세요")
-    mar_list = []
-    th4 = Thread(target=play_sound("close_your_mouth.mp3"))
+    mar_list = []   # mar_list: 측정한 MAR값들을 저장하는 리스트
+    th4 = Thread(target=play_sound("close_your_mouth.mp3")) # 동시 실행을 위해 스레드 사용
     th4.start()
-    time.sleep(5)
+    time.sleep(5)   # 안내문구가 재생될 동안 일시정지
     th_ring4 = Thread(target=play_sound("ppi.mp3"))
     th_ring4.start()
     time.sleep(1)
     for i in range(7):
-        mar_list.append(mouth_mar)
+        mar_list.append(mouth_mar)  # MAR을 mar_list에 append
         time.sleep(1)
-    CLOSE_MAR = sum(mar_list) / len(mar_list)
+    CLOSE_MAR = sum(mar_list) / len(mar_list)   # CLOSE_MAR : 입을 다문 상태의 평균 MAR
     global MAR_THRESH
-    MAR_THRESH = ((OPEN_MAR - CLOSE_MAR) * 0.7) + CLOSE_MAR
+    MAR_THRESH = ((OPEN_MAR - CLOSE_MAR) * 0.7) + CLOSE_MAR # MAR_THRESH : 하품 여부를 판단할 MAR의 역치값. OPEN_EAR과 CLOSE_EAR의 70%값
     print("close mouth =", mar_list, "\nCLOSE_MAR =", CLOSE_MAR, "\n")
     print("The last MAR_THRESH's value : ", MAR_THRESH, "\n")
 
@@ -337,7 +337,8 @@ while True:
             # (leftEAR + rightEAR) / 2 => both_ear.
             both_ear = (leftEAR + rightEAR) / 2.0  # I multiplied by 1000 to enlarge the scope.
             mouth_mar = mar
-
+            
+            # 화면에 눈 부분과 입 부분 표시
             leftEyeHull = cv2.convexHull(leftEye)
             rightEyeHull = cv2.convexHull(rightEye)
             mouthHull = cv2.convexHull(mouth)
