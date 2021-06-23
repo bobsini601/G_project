@@ -240,10 +240,10 @@ COUNTER = 0  # 졸음 프레임 카운터
 YAWN_COUNT = -1  # 하품 횟수 카운트
 
 closed_eyes_time = []  # 눈을 감은 시간
-TIMER_FLAG = False
-ALARM_FLAG = False
-YAWN_FLAG = False
-YAWN_TIMER = False
+TIMER_FLAG = False  # 졸음 시간 측정 타이머 작동 
+ALARM_FLAG = False  # 알람 작동 여부 
+YAWN_FLAG = False   # 이미 카운트 한 하품인지 체크
+YAWN_TIMER = False  # 하품 시간 측정 타이머 작동 여부
 
 ALARM_COUNT = 0
 
