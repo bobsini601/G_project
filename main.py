@@ -346,23 +346,23 @@ while True:
                 ALARM_FLAG = False
 
             cv2.putText(frame, "EAR : {:.2f}".format(both_ear), (300, 130), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
-                        (200, 30, 20), 2)
+                        (200, 30, 20), 2)   # 평균 EAR 값을 화면에 출력
 
-            if mar > MAR_THRESH:
-                if not YAWN_TIMER:
-                    start_yawn = timeit.default_timer()
-                    YAWN_TIMER = True
+            if mar > MAR_THRESH:    # MAR값이 역치보다 높은 상황
+                if not YAWN_TIMER:  # 하품 시간 측정 타이머가 작동중이 아니라면
+                    start_yawn = timeit.default_timer() # 입을 벌리기 시작한 시간을 기록한 뒤
+                    YAWN_TIMER = True   # 하품 시간 측정 타이머 작동 여부를 체크하는 YAWN_TIMER를 True로 만듬
 
-                if (timeit.default_timer() - start_yawn > 2.0):
-                    if not YAWN_FLAG:
-                        YAWN_COUNT += 1
-                        YAWN_FLAG = True
-            else:
+                if (timeit.default_timer() - start_yawn > 2.0): # 만약 2초 이상 하품중인데
+                    if not YAWN_FLAG:   # 하품을 카운트 한 적이 없다면
+                        YAWN_COUNT += 1 # 하품 횟수를 1 증가시킨 뒤
+                        YAWN_FLAG = True    # 하품 카운트 여부를 체크하는 YAWN_FLAG를 True로 만듬
+            else:   # MAR값이 역치보다 낮아지면 YAWN_TIMER와 YAWN_FLAG 모두 원래 상태(False)로 되돌림
                 YAWN_TIMER = False
                 YAWN_FLAG = False
 
             cv2.putText(frame, "MAR : {:.2f}".format(mar), (300, 430), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
-                        (200, 30, 20), 2)
+                        (200, 30, 20), 2)   # MAR 값을 화면에 출력
             text = "YAWN COUNT : " + str(YAWN_COUNT)
             cv2.putText(frame, text, (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
                         (200, 30, 20), 2)
