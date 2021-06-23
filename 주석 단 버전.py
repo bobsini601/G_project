@@ -99,10 +99,10 @@ label에 따라 알람이 다름.
 '''
 def def_alarm(result):
     if result == 0:
-        play_sound("nomal_alarm.wav")
+        play_sound("alarm_for_level_1.mp3")
         time.sleep(3)
     elif result == 1:
-        play_sound("ppi.mp3")
+        play_sound("alarm_for_level_2.MP3")
         time.sleep(3)
 
 
