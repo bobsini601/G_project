@@ -45,6 +45,7 @@ a{
     justify-content: center;    
     background-color: rgba(181, 214, 146, 0.753);
     width:80px;   
+    border-radius: 0.2rem;    
 }
 #hello_txt{
     font-weight: bolder;
