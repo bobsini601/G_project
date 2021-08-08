@@ -13,6 +13,7 @@ a{
     flex-direction:row;
     line-height:21px;
     justify-content:space-between;  /* 양쪽정렬 */
+    margin-top:20px;
     width:240px;
 }
 .container{
