@@ -8,6 +8,13 @@ a{
     justify-content:center;
     align-items: center;
 }
+.my_box{
+    display: flex;
+    flex-direction:row;
+    line-height:21px;
+    justify-content:space-between;  /* 양쪽정렬 */
+    width:240px;
+}
 .container{
     display:flex;
     float:left;
@@ -31,4 +38,13 @@ a{
 }
 .btn:hover{
     background-color: rgba(181, 214, 146, 0.753);
+}
+#log_btn{
+    display:flex;
+    justify-content: center;    
+    background-color: rgba(181, 214, 146, 0.753);
+    width:80px;   
+}
+#hello_txt{
+    font-weight: bolder;
 }
